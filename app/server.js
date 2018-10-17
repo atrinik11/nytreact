@@ -2,7 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const routes = require("./routes/routes");
+const routes = require("./routes/apiRoutes");
 const app = express();
 // require("dotenv").config();
 const PORT = process.env.PORT || 3001;
@@ -17,19 +17,21 @@ if (process.env.NODE_ENV === "production") {
 }
 
 //Adding the routes
-app.use(routes);
+app.use("/", routes);
 
 //Connect to the Mongo DB
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/nytreact");
-
-const db = mongoose.connection;
-db.on("error", function(error) {
-  console.log("Mongoose Error: ", error);
-});
-
-db.once("open", function() {
-  console.log("Mongoose connection successful.");
-});
+const db = process.env.MONGODB_URI || "mongodb://localhost/nytreact";
+mongoose.Promise = global.Promise;
+mongoose.connect(
+  db,
+  function(error) {
+    if (error) {
+      console.log("Mongoose Error: ", error);
+    } else {
+      console.log("Database connected Successfully!");
+    }
+  }
+);
 
 //Start the API server
 app.listen(PORT, function() {

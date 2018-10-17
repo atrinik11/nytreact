@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const articleSchema = new Schema({
-  topic: { type: String, required: true },
+  title: { type: String, required: true },
   date: { type: String },
-  dateSaved: { type: Date, default: Date.now },
+  // dateSaved: { type: Date, default: Date.now },
   url: { type: String }
 });
 
 const Article = mongoose.model("Article", articleSchema);
-
+console.log("Collection created");
 module.exports = Article;

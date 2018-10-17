@@ -1,15 +1,15 @@
 const controller = require("../controllers/controller");
 const router = require("express").Router();
+const path = require("path");
 
-//Get all articles
-router.route("/").get(controller.findAll);
+router.get("/api/retrieve", controller.findAll);
 
-//Saving the article
-// router.route("/savedArticles").post(controller.create);
-router.post("/savedArticles", controller.create);
-// router.post('/', function(req, res){
+router.post("/api/save", controller.create);
 
-//Deleting an article
-router.route("/savedArticles/:id").delete(controller.remove);
+router.delete("/api/save/:id", controller.remove);
+
+router.get("/*", function(req, res) {
+  res.sendFile(path.join(__dirname, "../../client/build/index.html"));
+});
 
 module.exports = router;

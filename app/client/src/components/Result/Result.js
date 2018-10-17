@@ -1,39 +1,27 @@
 import React from "react";
-import "./Result.css";
+// import "./SearchResult.css";
 
-const Result = props => {
-  const saveArticle = event => {
-    let index = event.target.name;
-    props.saveArticle(index);
-    console.log("in result: ", index);
-  };
-  return (
-    <div className="row">
-      <div className="col-12">
-        <div className="panel panel-primary">
-          <div className="panel-heading text-center">Results </div>
-          <div className="panel-body">
-            {props.results.map((article, i) => (
-              <div key={i} id={"result_" + (i + 1)} className="imp">
-                <a href={article.web_url}>
-                  <h4>{article.headline.main}</h4>
-                </a>
-                <p>Date Published: {article.pub_date}</p>
-                <button
-                  name={i}
-                  className="btn results btn-success"
-                  onClick={saveArticle}
-                >
-                  Save
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      {/* <div className="col-2" /> */}
-    </div>
-  );
-};
+const Result = props => (
+  <div className="container">
+    <li className="list-group-item">
+      <h4>
+        <span>
+          <a href={props.url} rel="noopener noreferrer" target="_blank">
+            <em>{props.title}</em>
+          </a>
+        </span>
+        <span className="btn-group pull-right">
+          <button
+            className="btn btn-primary"
+            onClick={() => props.handleSaveButton(props._id)}
+          >
+            Save
+          </button>
+        </span>
+      </h4>
+      <p>Date Published: {props.date}</p>
+    </li>
+  </div>
+);
 
 export default Result;

@@ -1,76 +1,63 @@
 import React from "react";
-import "./App.css";
-import Footer from "./components/Footer";
-import Jumbotron from "./components/Jumbotron";
-import Result from "./components/Result";
-import SavedArticles from "./components/SavedArticles";
-import SearchForm from "./components/SearchForm";
-import API from "./utils/API";
-import { Route, Link } from "react-router-dom";
+import moment from "moment";
+import Jumbotron from "../src/components/Jumbotron";
+import SearchForm from "../src/components/SearchForm";
+import Result from "../src/components/Result";
+import SavedArticles from "../src/components/SavedArticles";
+import API from "../src/utils/API";
 
-class Main extends React.Component {
-  constructor(props) {
-    super(props);
+class MainArticle extends React.Component {
+  state = {
+    dbArticles: [],
+    articles: [],
+    search: "",
+    startYear: "",
+    endYear: ""
+  };
 
-    this.state = {
-      filteredArticles: [],
-      articles: [],
-      search: "",
-      startYear: "",
-      endYear: ""
-    };
-  }
   componentDidMount() {
-    this.searchResults(
-      this.state.search,
-      this.state.startYear,
-      this.state.endYear
-    );
-    // this.savedArticles();
-  }
-  saveArticle = index => {
-    // event.preventDefault();
-    API.saveArticle(this.state.articles[index]).then(response => {
-      this.getArticles();
-      console.log("entered save article", response);
-    });
-    console.log("line 41: ", this.state.articles[index]._id);
-  };
-  getArticles = () => {
-    API.savedArticle().then(response => {
-      console.log("line 45:", response);
-      this.setState({ filteredArticles: response.data });
-      console.log("filtered array:", this.state.filteredArticles);
-    });
-  };
-  savedArticles = () => {
-    API.savedArticle().then(response => {
-      if (response.data !== this.state.filteredArticles) {
-        this.setState({ filteredArticles: response.data });
-      }
-    });
-  };
-
-  searchResults(search, startYear, endYear) {
-    API.search(search, startYear, endYear).then(response => {
-      this.setState({ articles: response.data.response.docs });
-    });
-    console.log("Array1", this.state.articles);
+    this.getLoadArticle();
   }
 
-  deleteArticle = id => {
-    API.deleteArticle(id).then(response => {
-      this.saveArticle();
-    });
+  getLoadArticle = () => {
+    API.loadArticle()
+      .then(res =>
+        this.setState({
+          dbArticles: res.data
+        })
+      )
+      .catch(err => console.log(err));
   };
 
-  handleInputChange = event => {
-    const name = event.target.name;
-    const value = event.target.value;
-    this.setState({
-      [name]: value
-    });
+  renderSearchArticles = () => {
+    return this.state.articles.map(article => (
+      <Result
+        _id={article._id}
+        key={article._id}
+        title={article.headline.main}
+        date={moment(article.pub_date).format("YYYY-MM-DD")}
+        url={article.web_url}
+        handleSaveButton={this.handleSaveButton}
+        loadArticle={this.getLoadArticle}
+      />
+    ));
   };
+
+  renderSavedArticles = () => {
+    console.log("dbArticles: ", this.state.dbArticles);
+    return this.state.dbArticles.map(article => (
+      <SavedArticles
+        _id={article._id}
+        key={article._id}
+        title={article.title}
+        date={moment(article.date).format("YYYY-MM-DD")}
+        url={article.url}
+        handleDeleteButton={this.handleDeleteButton}
+        loadArticle={this.getLoadArticle}
+      />
+    ));
+  };
+
   handleSearch = event => {
     this.setState({ search: event.target.value });
   };
@@ -81,86 +68,91 @@ class Main extends React.Component {
     this.setState({ endYear: event.target.value });
   };
 
-  clearArticles() {
-    let newState = {
-      search: "",
-      startYear: "",
-      endYear: "",
-      articles: {}
-    };
-    this.setState(newState);
-  }
   handleFormSubmit = event => {
     event.preventDefault();
-    this.clearArticles();
-    console.log("new state:", this.state.newState);
-    this.searchResults(
+    API.search(
       this.state.search,
       this.state.startYear,
       this.state.endYear
-    );
+    ).then(res => {
+      this.setState({ articles: res.data.response.docs.slice(0, 5) });
+    });
+    console.log("Array: ", this.state.articles);
+  };
+
+  handleSaveButton = id => {
+    const toSaveArticle = this.state.articles.find(article => article._id);
+    console.log("toSaveArticle: ", toSaveArticle);
+    const newSave = {
+      title: toSaveArticle.headline.main,
+      date: toSaveArticle.pub_date,
+      url: toSaveArticle.web_url
+    };
+    API.saveArticle(newSave).then(this.getLoadArticle());
+  };
+
+  handleDeleteButton = id => {
+    API.deleteArticle(id).then(this.getLoadArticle());
   };
 
   render() {
     return (
-      <div className="container-fluid">
-        <Jumbotron />
-        <div className="container">
-          <div className="row">
-            <SearchForm
-              search={this.state.search}
-              startYear={this.state.startYear}
-              endYear={this.state.endYear}
-              handleStartYear={this.handleStartYear}
-              handleEndYear={this.handleEndYear}
-              handleSearch={this.handleSearch}
-              handleFormSubmit={this.handleFormSubmit}
-              handleInputChange={this.handleInputChange}
-            />
-          </div>
+      <div className="container">
+        <div className="container-fluid">
+          <Jumbotron />
+          <SearchForm
+            handleSearch={this.handleSearch}
+            handleStartYear={this.handleStartYear}
+            handleEndYear={this.handleEndYear}
+            handleFormSubmit={this.handleFormSubmit}
+          />
         </div>
-        <div className="container">
+        <div className="container-fluid">
           <div className="row">
-            <div className="row result-row">
-              {!this.state.articles.length ? (
-                <h5 className="text-center">No Articles to Display</h5>
-              ) : (
-                <Route
-                  render={() => (
-                    <Result
-                      results={this.state.articles}
-                      saveArticle={this.saveArticle}
-                    />
-                  )}
-                />
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="container">
-          <div className="row">
-            <div className="row">
-              <div className="col-xs-12 col-md-10">
-                {!this.state.articles.length ? (
-                  <h5 className="text-center">No Saved Articles to Display</h5>
-                ) : (
-                  <Route
-                    //Rendering the saved articles from the db
-                    render={() => (
-                      <SavedArticles
-                        saved={this.state.filteredArticles}
-                        removeArticle={this.removeArticle}
-                      />
-                    )}
-                  />
-                )}
+            <div className="col-lg-12">
+              <div className="panel panel-primary">
+                <div className="panel-heading">
+                  <h3 className="panel-title">
+                    <strong>
+                      <i className="far fa-newspaper" />
+                      <i className="fa fa-newspaper" aria-hidden="true" />
+                      Search Result
+                    </strong>
+                    {/* <strong>Search Result</strong> */}
+                  </h3>
+                </div>
+                <div className="panel-body">
+                  <ul className="list-group">{this.renderSearchArticles()}</ul>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <Footer />
+        <br />
+        <br />
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-lg-12">
+              <div className="panel panel-primary">
+                <div className="panel-heading">
+                  <h3 className="panel-title">
+                    <strong>Saved Articles</strong>
+                  </h3>
+                </div>
+                <div className="panel-body">
+                  <ul className="list-group">{this.renderSavedArticles()}</ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer>
+          <p className="text-center mt-5">
+            New York Times Scrubber Built using React.js
+          </p>
+        </footer>
       </div>
     );
   }
 }
-export default Main;
+export default MainArticle;

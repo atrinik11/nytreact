@@ -9,37 +9,6 @@ col- {
   width: 100%;
 }
 
-.container {
-  width: 100%;
-  margin: auto;
-}
-.row {
-  margin: auto;
-}
-form {
-  margin-top: 20px;
-  width: 100%;
-  margin: auto;
-  border: 1px solid;
-}
-form h3 {
-  margin: 10px;
-  margin-bottom: 20px;
-  font-size: 35px;
-  letter-spacing: 0.35em;
-  border-bottom: 1px solid;
-}
-.subheading {
-  margin: 10px;
-}
-input[type="text"] {
-  margin: 0 10px 0 10px;
-  width: 90%;
-  height: 50px;
-  padding: 10px;
-  display: inline-block;
-}
-
 @media (min-width: 850px) {
   .col-1 {
     width: 8.33%;
@@ -76,5 +45,38 @@ input[type="text"] {
   }
   .col-12 {
     width: 100%;
+  }
+  .container {
+    width: 100%;
+    margin: auto;
+  }
+  .row {
+    margin: auto;
+  }
+  form {
+    margin-top: 20px;
+    width: 100%;
+    height: auto;
+    margin: auto;
+    border: 1px solid;
+  }
+  .form-group label {
+    margin: 15px 50px 1px 50px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+  input[type="text"] {
+    margin: auto;
+    margin-left: 45px;
+    width: 90%;
+    height: 40px;
+    padding: 10px;
+  }
+  .search {
+    float: none;
+    margin-left: 400px;
+    margin-bottom: 10px;
+    width: 150px;
+    font-size: 20px;
   }
 }
